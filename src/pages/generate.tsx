@@ -1,5 +1,6 @@
 import { type NextPage } from "next";
 import { useState } from "react";
+import Image from "next/image";
 import { Input } from "~/components/Input";
 import { FormGroup } from "~/components/FormGroup";
 import { api } from "~/utils/api";
@@ -9,6 +10,7 @@ const GeneratePage: NextPage = () => {
   const [form, setForm] = useState({
     prompt: "",
   });
+  const [imageUrl, setImageUrl] = useState("");
 
   function updateForm(key: string) {
     return function (e: React.ChangeEvent<HTMLInputElement>) {
@@ -20,7 +22,8 @@ const GeneratePage: NextPage = () => {
   }
   const generateIcon = api.generate.generateIcon.useMutation({
     onSuccess(data) {
-      console.log("mutation finished", data);
+      if (!data.imageUrl) return;
+      setImageUrl(data.imageUrl);
     },
   });
 
@@ -30,6 +33,7 @@ const GeneratePage: NextPage = () => {
     generateIcon.mutate({
       prompt: form.prompt,
     });
+    setForm({ prompt: "" });
   }
 
   const session = useSession();
@@ -67,6 +71,12 @@ const GeneratePage: NextPage = () => {
             Submit
           </Button>
         </form>
+        <Image
+          src={imageUrl}
+          alt={"An image of:" + form.prompt}
+          width={500}
+          height={500}
+        />
       </main>
     </>
   );
