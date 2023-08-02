@@ -7,21 +7,37 @@ import {
 } from "~/server/api/trpc";
 import { Configuration, OpenAIApi } from "openai";
 import { env } from "~/env.mjs"
+import { b64Image } from "~/data/b64Image";
+import AWS from "aws-sdk";
+
+const s3 = new AWS.S3({
+  credentials: {
+    accessKeyId: env.ACCESS_KEY_ID,
+    secretAccessKey: env.SECRET_ACCESS_KEY,
+  },
+  region: "us-west-1"
+})
+
 const configuration = new Configuration({
     apiKey: env.DALLE_API_KEY,
 })
+
 const openai = new OpenAIApi(configuration);
 
 async function generateIcon(prompt: string): Promise<string | undefined> {
     if (env.MOCK_DALLE === "true"){
-        return "https://cdn.britannica.com/38/111338-050-D23BE7C8/Stars-NGC-290-Hubble-Space-Telescope.jpg"
+        return b64Image;
     } else {
         const response = await openai.createImage({
             prompt,
             n: 1,
-            size: "1024x1024"
+            size: "1024x1024",
+            response_format: "b64_json",
         })
-        return response.data.data[0]?.url
+        console.log("=====")
+        console.log(response.data.data[0]?.b64_json)
+        console.log("=====")
+        return response.data.data[0]?.b64_json
     }
 }
 
@@ -57,10 +73,18 @@ export const generateRouter = createTRPCRouter({
             })
         }
         // Make fetch req to dalle API
-        const url = await generateIcon(input.prompt)
+        const base64EncodedImage = await generateIcon(input.prompt)
+        // TODO: save the images to the s3 bucket
+        await s3.putObject({
+            Bucket: 'corporate-memphis-ai',
+            Body: Buffer.from(base64EncodedImage!, "base64"),
+            Key: "my-image2.png", // #TODO: generate random id
+            ContentEncoding: "base64",
+            ContentType: "image/png",
+        }).promise();
 
         return{
-            imageUrl: url,
+            imageUrl: base64EncodedImage,
         }
     }),
 });

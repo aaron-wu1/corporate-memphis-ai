@@ -6,6 +6,7 @@ import { FormGroup } from "~/components/FormGroup";
 import { api } from "~/utils/api";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "~/components/Button";
+
 const GeneratePage: NextPage = () => {
   const [form, setForm] = useState({
     prompt: "",
@@ -29,7 +30,6 @@ const GeneratePage: NextPage = () => {
 
   function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault(); // preventing page refresh
-    // TODO: submit the form data to the backend
     generateIcon.mutate({
       prompt: form.prompt,
     });
@@ -72,7 +72,7 @@ const GeneratePage: NextPage = () => {
           </Button>
         </form>
         <Image
-          src={imageUrl}
+          src={`data:image/png;base64, ${imageUrl}`}
           alt={"An image of:" + form.prompt}
           width={500}
           height={500}
