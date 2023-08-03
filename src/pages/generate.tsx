@@ -21,7 +21,7 @@ const GeneratePage: NextPage = () => {
       }));
     };
   }
-  const generateIcon = api.generate.generateIcon.useMutation({
+  const generateIcon = api.generate.generateImage.useMutation({
     onSuccess(data) {
       if (!data.imageUrl) return;
       setImageUrl(data.imageUrl);

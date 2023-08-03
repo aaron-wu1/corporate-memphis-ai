@@ -24,7 +24,9 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-async function generateIcon(prompt: string): Promise<string | undefined> {
+/** Generate images
+ *  Takes prompt and returns base 64 encoded, json formatted image */ 
+async function generateImage(prompt: string): Promise<string | undefined> {
     if (env.MOCK_DALLE === "true"){
         return b64Image;
     } else {
@@ -41,20 +43,19 @@ async function generateIcon(prompt: string): Promise<string | undefined> {
     }
 }
 
+/** Checks db if user has enough credits, and perform api reqs
+ *  Mutates prisma db, zod validates request */ 
 export const generateRouter = createTRPCRouter({
-    generateIcon: protectedProcedure
+    generateImage: protectedProcedure
     .input(
         z.object({
             prompt: z.string(),
         })
     )
     .mutation(async ({ ctx, input }) => {
-        console.log("we are here", input.prompt);
-
-        // TODO: verify the user has enough credits
         const {count} = await ctx.prisma.user.updateMany({
             where: {
-                id: ctx.session.user.id, //TODO: replace with real id
+                id: ctx.session.user.id,
                 credits: {
                     gte: 1 // greater than or equal to 1
                 },
@@ -65,20 +66,30 @@ export const generateRouter = createTRPCRouter({
                 }
             }
         })
-        
+        // catch if out of credits
         if (count <= 0) {
             throw new TRPCError({
                 code: 'BAD_REQUEST',
                 message: 'you are out of credits'
             })
         }
+
         // Make fetch req to dalle API
-        const base64EncodedImage = await generateIcon(input.prompt)
-        // TODO: save the images to the s3 bucket
+        const base64EncodedImage = await generateImage(input.prompt)
+
+        // defines image model
+        const image = await ctx.prisma.image.create({
+            data:{
+                prompt: input.prompt,
+                userId: ctx.session.user.id,
+            }
+        })
+
+        // saves images into s3 bucket
         await s3.putObject({
             Bucket: 'corporate-memphis-ai',
             Body: Buffer.from(base64EncodedImage!, "base64"),
-            Key: "my-image2.png", // #TODO: generate random id
+            Key: image.id,
             ContentEncoding: "base64",
             ContentType: "image/png",
         }).promise();
