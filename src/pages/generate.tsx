@@ -21,7 +21,7 @@ const GeneratePage: NextPage = () => {
       }));
     };
   }
-  const generateIcon = api.generate.generateImage.useMutation({
+  const generateImage = api.generate.generateImage.useMutation({
     onSuccess(data) {
       if (!data.imageUrl) return;
       setImageUrl(data.imageUrl);
@@ -30,7 +30,7 @@ const GeneratePage: NextPage = () => {
 
   function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault(); // preventing page refresh
-    generateIcon.mutate({
+    generateImage.mutate({
       prompt: form.prompt,
     });
     setForm({ prompt: "" });
@@ -72,7 +72,7 @@ const GeneratePage: NextPage = () => {
           </Button>
         </form>
         <Image
-          src={`data:image/png;base64, ${imageUrl}`}
+          src={imageUrl}
           alt={"An image of:" + form.prompt}
           width={500}
           height={500}

@@ -11,7 +11,7 @@ const config = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "cdn.britannica.com",
+        hostname: "corporate-memphis-ai.s3.us-west-2.amazonaws.com",
       },
     ],
   },

@@ -15,8 +15,10 @@ const s3 = new AWS.S3({
     accessKeyId: env.ACCESS_KEY_ID,
     secretAccessKey: env.SECRET_ACCESS_KEY,
   },
-  region: "us-west-1"
+  region: "us-west-2"
 })
+
+const BUCKET_NAME = 'corporate-memphis-ai'
 
 const configuration = new Configuration({
     apiKey: env.DALLE_API_KEY,
@@ -36,9 +38,6 @@ async function generateImage(prompt: string): Promise<string | undefined> {
             size: "1024x1024",
             response_format: "b64_json",
         })
-        console.log("=====")
-        console.log(response.data.data[0]?.b64_json)
-        console.log("=====")
         return response.data.data[0]?.b64_json
     }
 }
@@ -87,15 +86,16 @@ export const generateRouter = createTRPCRouter({
 
         // saves images into s3 bucket
         await s3.putObject({
-            Bucket: 'corporate-memphis-ai',
+            Bucket: BUCKET_NAME,
             Body: Buffer.from(base64EncodedImage!, "base64"),
             Key: image.id,
             ContentEncoding: "base64",
             ContentType: "image/png",
         }).promise();
 
+        // s3 static site hosting images
         return{
-            imageUrl: base64EncodedImage,
+            imageUrl: `https://${BUCKET_NAME}.s3.us-west-2.amazonaws.com/${image.id}`,
         }
     }),
 });
