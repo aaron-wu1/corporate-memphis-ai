@@ -4,16 +4,25 @@ import Image from "next/image";
 import { Input } from "~/components/Input";
 import { FormGroup } from "~/components/FormGroup";
 import { api } from "~/utils/api";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "~/components/Button";
-import { useBuyCredits } from "~/hooks/useBuyCredits";
+
+const colors = [
+  "red",
+  "blue",
+  "pink",
+  "green",
+  "orange",
+  "yellow",
+  "white",
+  "black",
+];
 
 const GeneratePage: NextPage = () => {
-  const { buyCredits } = useBuyCredits();
-
   const [form, setForm] = useState({
     prompt: "",
+    color: "",
   });
+
   const [imageUrl, setImageUrl] = useState("");
 
   function updateForm(key: string) {
@@ -33,62 +42,59 @@ const GeneratePage: NextPage = () => {
 
   function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault(); // preventing page refresh
-    generateImage.mutate({
-      prompt: form.prompt,
-    });
-    setForm({ prompt: "" });
+    generateImage.mutate(form);
   }
-
-  const session = useSession();
-
-  const isLoggedIn = !!session.data;
 
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-center">
-        {!isLoggedIn && (
-          <Button
-            onClick={() => {
-              signIn().catch(console.error);
-            }}
-          >
-            Login
-          </Button>
-        )}
-        {isLoggedIn && (
-          <>
-            <Button
-              onClick={() => {
-                buyCredits().catch(console.error);
-              }}
-            >
-              Buy Credits
-            </Button>
-            <Button
-              onClick={() => {
-                signOut().catch(console.error);
-              }}
-            >
-              Logout
-            </Button>
-          </>
-        )}
-        {session.data?.user.name}
+      <main className="mx-auto mt-24 flex min-h-screen flex-col justify-center px-8">
+        <h1 className="text-6xl">Generate your images!</h1>
+        <p className="mb-12 text-2xl">
+          Fill out the form below to start generating your own assets.
+        </p>
         <form className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
-          <FormGroup>
+          <h2 className="text-xl">1. Describe what your image to look like</h2>
+          <FormGroup className="mb-12">
             <label>Prompt</label>
             <Input value={form.prompt} onChange={updateForm("prompt")}></Input>
           </FormGroup>
-          <Button className="rounded bg-blue-400 px-4 py-2 hover:bg-blue-500">
+
+          <h2 className="text-xl">2. Pick colors</h2>
+          <FormGroup className="mb-12 grid grid-cols-4">
+            {colors.map((color) => (
+              <label className="flex gap-2 text-2xl">
+                <input
+                  type="radio"
+                  name="color"
+                  checked={color === form.color}
+                  onChange={() => setForm((prev) => ({ ...prev, color }))}
+                ></input>
+                {color}
+              </label>
+            ))}
+          </FormGroup>
+
+          <Button
+            isLoading={generateImage.isLoading}
+            disabled={generateImage.isLoading}
+          >
             Submit
           </Button>
         </form>
-        <Image
-          src={imageUrl}
-          alt={"An image of:" + form.prompt}
-          width={500}
-          height={500}
-        />
+        {imageUrl && (
+          <>
+            <h2 className="text-xl">Your generated images!</h2>
+            <section className="grid grid-cols-4 gap-4">
+              <Image
+                src={imageUrl}
+                alt={"An image of:" + form.prompt}
+                width="100"
+                height="100"
+                className="w-full"
+              />
+            </section>
+          </>
+        )}
       </main>
     </>
   );

@@ -21,6 +21,7 @@
     "@trpc/react-query": "^10.26.0",
     "@trpc/server": "^10.26.0",
     "aws-sdk": "^2.1428.0",
+    "clsx": "^2.0.0",
     "micro": "^10.0.1",
     "next": "^13.4.2",
     "next-auth": "^4.22.1",
