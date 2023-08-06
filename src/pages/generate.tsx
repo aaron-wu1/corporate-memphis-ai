@@ -62,7 +62,7 @@ const GeneratePage: NextPage = () => {
           <h2 className="text-xl">2. Pick colors</h2>
           <FormGroup className="mb-12 grid grid-cols-4">
             {colors.map((color) => (
-              <label className="flex gap-2 text-2xl">
+              <label key={color} className="flex gap-2 text-2xl">
                 <input
                   type="radio"
                   name="color"

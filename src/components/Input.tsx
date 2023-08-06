@@ -1,5 +1,3 @@
-import { text } from "stream/consumers";
-
 export function Input(props: React.ComponentPropsWithoutRef<"input">) {
   return (
     <input
