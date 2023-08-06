@@ -97,8 +97,14 @@ export const generateRouter = createTRPCRouter({
             }
 
             // s3 static site hosting images
-            return {
-                imageUrl: `https://${BUCKET_NAME}.s3.us-west-2.amazonaws.com/${image.id}`,
+            if (env.MOCK_DALLE === "true") {
+                return {
+                    imageUrl: `https://${BUCKET_NAME}.s3.us-west-2.amazonaws.com/${env.MOCK_IMG}`,
+                }
+            } else {
+                return {
+                    imageUrl: `https://${BUCKET_NAME}.s3.us-west-2.amazonaws.com/${image.id}`,
+                }
             }
         }),
 });

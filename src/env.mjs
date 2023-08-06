@@ -31,6 +31,7 @@ export const env = createEnv({
     HOST_NAME: z.string(),
     PRICE_ID: z.string(),
     STRIPE_WEB_HOOK_SECRET: z.string(),
+    MOCK_IMG: z.string(),
   },
 
   /**
@@ -56,6 +57,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     DALLE_API_KEY: process.env.DALLE_API_KEY,
     MOCK_DALLE: process.env.MOCK_DALLE,
+    MOCK_IMG: process.env.MOCK_IMG,
     SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY,
     ACCESS_KEY_ID: process.env.ACCESS_KEY_ID,
     NEXT_PUBLIC_STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_KEY,
